@@ -206,8 +206,12 @@ jQuery.fn.springy = function(params) {
 				}
 			}
 
+			//Figure out the font situation
+			var fontSize = edge.data.fontSize ? edge.data.fontSize : 10.0,
+				fontFamily = edge.data.fontFamily ? edge.data.fontFamily : "consolas";
+
 			//change default to  10.0 to allow text fit between edges
-			var spacing = 12.0;
+			var spacing = fontSize + 2;
 
 			// Figure out how far off center the line should be drawn
 			var offset = normal.multiply(-((total - 1) * spacing)/2.0 + (n * spacing));
@@ -276,12 +280,12 @@ jQuery.fn.springy = function(params) {
 				ctx.save();
 				ctx.textAlign = "center";
 				ctx.textBaseline = "top";
-				ctx.font = (edge.data.font !== undefined) ? edge.data.font : edgeFont;
+				ctx.font = fontSize + "px " + fontFamily;
 				ctx.fillStyle = stroke;
 				var angle = Math.atan2(s2.y - s1.y, s2.x - s1.x);
-				var displacement = -8;
+				var displacement = -1 * fontSize;
 				if (edgeLabelsUpright && (angle > Math.PI/2 || angle < -Math.PI/2)) {
-					displacement = 8;
+					displacement = fontSize;
 					angle += Math.PI;
 				}
 				var textPos = s1.add(s2).divide(2).add(normal.multiply(displacement));
