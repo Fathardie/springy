@@ -189,110 +189,137 @@ jQuery.fn.springy = function(params) {
 			var y1 = toScreen(p1).y;
 			var x2 = toScreen(p2).x;
 			var y2 = toScreen(p2).y;
-
-			var direction = new Springy.Vector(x2-x1, y2-y1);
-			var normal = direction.normal().normalise();
-
-			var from = graph.getEdges(edge.source, edge.target);
-			var to = graph.getEdges(edge.target, edge.source);
-
-			var total = from.length + to.length;
-
-			// Figure out edge's position in relation to other edges between the same nodes
-			var n = 0;
-			for (var i=0; i<from.length; i++) {
-				if (from[i].id === edge.id) {
-					n = i;
-				}
-			}
-
+			
 			//Figure out the font situation
 			var fontSize = edge.data.fontSize ? edge.data.fontSize : 10.0,
 				fontFamily = edge.data.fontFamily ? edge.data.fontFamily : "consolas";
+			
+			if(x1 !== x2 || y1 !== y2) {
+				var direction = new Springy.Vector(x2-x1, y2-y1);
+				var normal = direction.normal().normalise();
 
-			//change default to  10.0 to allow text fit between edges
-			var spacing = fontSize + 2;
+				var from = graph.getEdges(edge.source, edge.target);
+				var to = graph.getEdges(edge.target, edge.source);
 
-			// Figure out how far off center the line should be drawn
-			var offset = normal.multiply(-((total - 1) * spacing)/2.0 + (n * spacing));
+				var total = from.length + to.length;
 
-			var paddingX = 6;
-			var paddingY = 6;
-
-			var s1 = toScreen(p1).add(offset);
-			var s2 = toScreen(p2).add(offset);
-
-			var boxWidth = edge.target.getWidth() + paddingX;
-			var boxHeight = edge.target.getHeight() + paddingY;
-
-			var intersection = intersect_line_box(s1, s2, {x: x2-boxWidth/2.0, y: y2-boxHeight/2.0}, boxWidth, boxHeight);
-
-			if (!intersection) {
-				intersection = s2;
-			}
-
-			var stroke = (edge.data.color !== undefined) ? edge.data.color : '#000000';
-
-			var arrowWidth;
-			var arrowLength;
-
-			var weight = (edge.data.weight !== undefined) ? edge.data.weight : 1.0;
-
-			ctx.lineWidth = Math.max(weight *  2, 0.1);
-			arrowWidth = 1 + ctx.lineWidth;
-			arrowLength = 8;
-
-			var directional = (edge.data.directional !== undefined) ? edge.data.directional : true;
-
-			// line
-			var lineEnd;
-			if (directional) {
-				lineEnd = intersection.subtract(direction.normalise().multiply(arrowLength * 0.5));
-			} else {
-				lineEnd = s2;
-			}
-
-			ctx.strokeStyle = stroke;
-			ctx.beginPath();
-			ctx.moveTo(s1.x, s1.y);
-			ctx.lineTo(lineEnd.x, lineEnd.y);
-			ctx.stroke();
-
-			// arrow
-			if (directional) {
-				ctx.save();
-				ctx.fillStyle = stroke;
-				ctx.translate(intersection.x, intersection.y);
-				ctx.rotate(Math.atan2(y2 - y1, x2 - x1));
-				ctx.beginPath();
-				ctx.moveTo(-arrowLength, arrowWidth);
-				ctx.lineTo(0, 0);
-				ctx.lineTo(-arrowLength, -arrowWidth);
-				ctx.lineTo(-arrowLength * 0.8, -0);
-				ctx.closePath();
-				ctx.fill();
-				ctx.restore();
-			}
-
-			// label
-			if (edge.data.label !== undefined) {
-				text = edge.data.label
-				ctx.save();
-				ctx.textAlign = "center";
-				ctx.textBaseline = "top";
-				ctx.font = fontSize + "px " + fontFamily;
-				ctx.fillStyle = stroke;
-				var angle = Math.atan2(s2.y - s1.y, s2.x - s1.x);
-				var displacement = -1 * fontSize;
-				if (edgeLabelsUpright && (angle > Math.PI/2 || angle < -Math.PI/2)) {
-					displacement = fontSize;
-					angle += Math.PI;
+				// Figure out edge's position in relation to other edges between the same nodes
+				var n = 0;
+				for (var i=0; i<from.length; i++) {
+					if (from[i].id === edge.id) {
+						n = i;
+					}
 				}
-				var textPos = s1.add(s2).divide(2).add(normal.multiply(displacement));
-				ctx.translate(textPos.x, textPos.y);
-				ctx.rotate(angle);
-				ctx.fillText(text, 0,-2);
-				ctx.restore();
+
+				//change default to  10.0 to allow text fit between edges
+				var spacing = fontSize + 2;
+
+				// Figure out how far off center the line should be drawn
+				var offset = normal.multiply(-((total - 1) * spacing)/2.0 + (n * spacing));
+
+				var paddingX = 6;
+				var paddingY = 6;
+
+				var s1 = toScreen(p1).add(offset);
+				var s2 = toScreen(p2).add(offset);
+
+				var boxWidth = edge.target.getWidth() + paddingX;
+				var boxHeight = edge.target.getHeight() + paddingY;
+
+				var intersection = intersect_line_box(s1, s2, {x: x2-boxWidth/2.0, y: y2-boxHeight/2.0}, boxWidth, boxHeight);
+
+				if (!intersection) {
+					intersection = s2;
+				}
+
+				var stroke = (edge.data.color !== undefined) ? edge.data.color : '#000000';
+
+				var arrowWidth;
+				var arrowLength;
+
+				var weight = (edge.data.weight !== undefined) ? edge.data.weight : 1.0;
+
+				ctx.lineWidth = Math.max(weight *  2, 0.1);
+				arrowWidth = 1 + ctx.lineWidth;
+				arrowLength = 8;
+
+				var directional = (edge.data.directional !== undefined) ? edge.data.directional : true;
+
+				// line
+				var lineEnd;
+				if (directional) {
+					lineEnd = intersection.subtract(direction.normalise().multiply(arrowLength * 0.5));
+				} else {
+					lineEnd = s2;
+				}
+
+				ctx.strokeStyle = stroke;
+				ctx.beginPath();
+				ctx.moveTo(s1.x, s1.y);
+				ctx.lineTo(lineEnd.x, lineEnd.y);
+				ctx.stroke();
+
+				// arrow
+				if (directional) {
+					ctx.save();
+					ctx.fillStyle = stroke;
+					ctx.translate(intersection.x, intersection.y);
+					ctx.rotate(Math.atan2(y2 - y1, x2 - x1));
+					ctx.beginPath();
+					ctx.moveTo(-arrowLength, arrowWidth);
+					ctx.lineTo(0, 0);
+					ctx.lineTo(-arrowLength, -arrowWidth);
+					ctx.lineTo(-arrowLength * 0.8, -0);
+					ctx.closePath();
+					ctx.fill();
+					ctx.restore();
+				}
+
+				// label
+				if (edge.data.label !== undefined) {
+					text = edge.data.label
+					ctx.save();
+					ctx.textAlign = "center";
+					ctx.textBaseline = "top";
+					ctx.font = fontSize + "px " + fontFamily;
+					ctx.fillStyle = stroke;
+					var angle = Math.atan2(s2.y - s1.y, s2.x - s1.x);
+					var displacement = -1 * fontSize;
+					if (edgeLabelsUpright && (angle > Math.PI/2 || angle < -Math.PI/2)) {
+						displacement = fontSize;
+						angle += Math.PI;
+					}
+					var textPos = s1.add(s2).divide(2).add(normal.multiply(displacement));
+					ctx.translate(textPos.x, textPos.y);
+					ctx.rotate(angle);
+					ctx.fillText(text, 0,-2);
+					ctx.restore();
+				}
+			
+			} else {
+				var arc_radius = 20,
+					x_arc = x1,
+					y_arc = y1 - arc_radius - 0.5 * fontSize,
+					x_text = x1,
+					y_text = y_arc - 0.5 * arc_radius - 10;
+
+				ctx.save();
+                ctx.beginPath();
+                ctx.arc(x_arc,y_arc,arc_radius, 0.75 * Math.PI, 2.25*Math.PI);
+                ctx.stroke();
+                ctx.restore();
+
+                if(edge.data.label !== undefined) {
+                	var text = edge.data.label;
+
+                	ctx.save()
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "bottom";
+                    ctx.font = fontSize + "px " + fontFamily;
+                    ctx.fillStyle = stroke;
+                    ctx.fillText(text, x_text, y_text);
+					ctx.restore();
+				}
 			}
 
 		},
